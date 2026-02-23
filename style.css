@@ -1,1 +1,50 @@
 
+/* Estilos auxiliares para o dashboard */
+.glass {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(30, 41, 59, 0.5);
+}
+
+/* Força o ícone do seletor de data a ser branco com alto contraste conforme imagem de referência */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(1.5) contrast(1.2);
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* Estilização para o seletor de data nativo no mobile */
+input[type="date"]::-webkit-datetime-edit {
+  padding: 0;
+  color: white;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
+}
+
+.auth-input-focus:focus {
+  border-color: #ffffff;
+  box-shadow: 0 0 0 1px #ffffff;
+}
+
+.custom-scrollbar::-webkit-scrollbar { 
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track { 
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb { 
+  background: #1e293b;
+  border-radius: 10px;
+}
+
