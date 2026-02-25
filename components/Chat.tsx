@@ -41,7 +41,8 @@ const Chat: React.FC = () => {
     sheetName: 'CHAT', 
     type: 'group',
     unreadCount: 0,
-    lastReadCount: 0
+    lastReadCount: 0,
+    members: []
   });
   
   const [users, setUsers] = useState<User[]>([]);
@@ -79,16 +80,17 @@ const Chat: React.FC = () => {
     storageService.getUsers().then(setUsers);
     storageService.getGroups().then(dynamicGroups => {
       const baseGroups: ChatGroup[] = [
-        { name: 'GRUPO PCP', sheetName: 'CHAT', type: 'group', unreadCount: 0, lastReadCount: 0 },
-        { name: 'LOGÍSTICA INTERNA', sheetName: 'LOG_INT', type: 'group', unreadCount: 0, lastReadCount: 0 }
+        { name: 'GRUPO PCP', sheetName: 'CHAT', type: 'group', unreadCount: 0, lastReadCount: 0, members: [] },
+        { name: 'LOGÍSTICA INTERNA', sheetName: 'LOG_INT', type: 'group', unreadCount: 0, lastReadCount: 0, members: [] }
       ];
       
       const mapped = dynamicGroups.map(g => ({
         name: g.name,
-        sheetName: g.name,
+        sheetName: g.sheetName,
         type: 'group' as const,
         unreadCount: 0,
-        lastReadCount: 0
+        lastReadCount: 0,
+        members: g.members || []
       }));
       
       const final = [...baseGroups];
@@ -106,6 +108,19 @@ const Chat: React.FC = () => {
     }
     markAsRead(activeSession.sheetName, messages.length);
   }, [messages, activeSession.sheetName]);
+
+  const handleSelectSession = (session: ChatGroup) => {
+    if (session.type === 'group' && currentUser?.id) {
+      const isBaseGroup = session.sheetName === 'CHAT' || session.sheetName === 'LOG_INT';
+      const hasPermission = isBaseGroup || (session.members && session.members.includes(currentUser.id));
+      
+      if (!hasPermission) {
+        alert("Acesso Negado: Você não é membro deste canal operacional.");
+        return;
+      }
+    }
+    setActiveSession(session);
+  };
 
   const handleSend = async (customPayload?: Partial<ChatMessage>) => {
     if (!currentUser || sending) return;
@@ -219,7 +234,7 @@ const Chat: React.FC = () => {
         users={users}
         groups={groups}
         activeSession={activeSession}
-        onSelect={(s) => { setActiveSession(s); setActivePopover(null); }}
+        onSelect={(s) => { handleSelectSession(s); setActivePopover(null); }}
         unreadMap={unreadMap}
         previews={previews}
         onAddGroup={() => setIsCreateGroupModalOpen(true)}
@@ -418,7 +433,26 @@ const Chat: React.FC = () => {
         onCreate={async (p) => {
           await storageService.createGroup(p);
           const dynamicGroups = await storageService.getGroups();
-          setGroups(dynamicGroups.map(g => ({ ...g, type: 'group', unreadCount: 0, lastReadCount: 0 } as ChatGroup)));
+          const baseGroups: ChatGroup[] = [
+            { name: 'GRUPO PCP', sheetName: 'CHAT', type: 'group', unreadCount: 0, lastReadCount: 0, members: [] },
+            { name: 'LOGÍSTICA INTERNA', sheetName: 'LOG_INT', type: 'group', unreadCount: 0, lastReadCount: 0, members: [] }
+          ];
+          
+          const mapped = dynamicGroups.map(g => ({
+            name: g.name,
+            sheetName: g.sheetName,
+            type: 'group' as const,
+            unreadCount: 0,
+            lastReadCount: 0,
+            members: g.members || []
+          }));
+          
+          const final = [...baseGroups];
+          mapped.forEach(mg => {
+            if (!final.find(f => f.sheetName === mg.sheetName)) final.push(mg);
+          });
+          
+          setGroups(final);
         }}
       />
     </div>
