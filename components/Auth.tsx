@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Shield, Lock, Mail, ChevronRight, AlertCircle, Loader2, User as UserIcon, Briefcase, ArrowLeft } from 'lucide-react';
 import { User } from '../types';
 import { storageService } from '../services/storageService';
@@ -18,6 +18,20 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [cargo, setCargo] = useState('');
+  const [particles, setParticles] = useState<Array<{ id: number; left: string; top: string; size: number; duration: number; delay: number; opacity: number }>>([]);
+
+  useEffect(() => {
+    const newParticles = Array.from({ length: 20 }).map((_, i) => ({
+      id: i,
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      size: Math.random() * 3 + 1,
+      duration: Math.random() * 4 + 3,
+      delay: Math.random() * 5,
+      opacity: Math.random() * 0.5 + 0.3
+    }));
+    setParticles(newParticles);
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +50,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
         // Validação estrita conforme solicitado: "Só vai ter acesso se consta como ativo"
         const userStatus = String(foundUser.status || foundUser.STATUS || '').toLowerCase().trim();
         if (userStatus !== 'ativo') {
-          setError('ACESSO NEGADO: USUÁRIO INATIVO NO BANCO DE DADOS');
+          setError('ACESSO NEGADO: USUÁRIO NÃO CADASTRADO');
         } else {
           onLogin(foundUser);
         }
@@ -98,22 +112,41 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#050a14] flex flex-col items-center justify-center p-6 select-none">
+    <div className="min-h-screen bg-[#050a14] flex flex-col items-center justify-center p-6 select-none relative overflow-hidden">
       
-      <div className="flex flex-col items-center mb-10 text-center animate-in fade-in slide-in-from-top-4 duration-500">
-        <div className="w-20 h-20 bg-blue-600/10 border border-blue-500/20 rounded-[28px] flex items-center justify-center mb-8 shadow-2xl shadow-blue-500/10">
-          <Shield size={40} className="text-blue-500" strokeWidth={1.5} />
+      {/* Partículas de Fundo */}
+      <div className="particles-container fixed inset-0 pointer-events-none z-0">
+        {particles.map(p => (
+          <div 
+            key={p.id}
+            className="particle"
+            style={{
+              left: p.left,
+              top: p.top,
+              width: `${p.size}px`,
+              height: `${p.size}px`,
+              animationDuration: `${p.duration}s`,
+              animationDelay: `${p.delay}s`,
+              opacity: p.opacity
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="flex flex-col items-center mb-10 text-center animate-in fade-in slide-in-from-top-4 duration-500 relative z-10">
+        <div className="w-20 h-20 bg-transparent border border-white/40 rounded-[28px] flex items-center justify-center mb-8 shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+          <Shield size={40} className="text-white" strokeWidth={1.5} />
         </div>
         
         <h1 className="text-4xl md:text-[52px] font-[900] italic text-white leading-none uppercase tracking-tight mb-3">
           PORTAL LOGÍSTICA<br/>FOLLOW-UP
         </h1>
         <p className="text-slate-500 text-[11px] font-black uppercase tracking-[0.4em] mt-2 italic">
-          ENTERPRISE CLOUD SYNC v3.2
+          ENTERPRISE CLOUD SYNC V3.2
         </p>
       </div>
 
-      <div className="w-full max-w-md bg-[#0c1425] border border-slate-800/50 rounded-[48px] p-10 md:p-12 shadow-2xl relative animate-in zoom-in-95 duration-300">
+      <div className="w-full max-w-md bg-transparent backdrop-blur-sm rounded-[48px] p-10 md:p-12 shadow-2xl relative animate-in zoom-in-95 duration-300 z-10 neon-border-white">
         
         <form onSubmit={isRegistering ? handleRegister : handleLogin} className="space-y-8">
           
@@ -148,7 +181,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                   type="text" 
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-[#050a14]/60 border border-slate-800 rounded-[22px] pl-14 pr-6 py-4 text-sm font-bold text-white focus:outline-none focus:border-blue-500 transition-all uppercase placeholder:text-slate-800"
+                  className="w-full bg-[#050a14]/60 rounded-[22px] pl-14 pr-6 py-4 text-sm font-bold text-white transition-all uppercase placeholder:text-slate-800 neon-input-white"
                   placeholder="EX: JAILSON FILHO"
                   required
                 />
@@ -164,7 +197,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                 type="email" 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-[#050a14]/60 border border-slate-800 rounded-[22px] pl-14 pr-6 py-4 text-sm font-bold text-white focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-800"
+                className="w-full bg-[#050a14]/60 rounded-[22px] pl-14 pr-6 py-4 text-sm font-bold text-white transition-all placeholder:text-slate-800 neon-input-white"
                 placeholder="seu@empresa.com"
                 required
               />
@@ -179,7 +212,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                 type="password" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-[#050a14]/60 border border-slate-800 rounded-[22px] pl-14 pr-6 py-4 text-sm font-bold text-white focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-800"
+                className="w-full bg-[#050a14]/60 rounded-[22px] pl-14 pr-6 py-4 text-sm font-bold text-white transition-all placeholder:text-slate-800 neon-input-white"
                 placeholder="••••••••"
                 required
               />
@@ -195,7 +228,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                   type="text" 
                   value={cargo}
                   onChange={(e) => setCargo(e.target.value)}
-                  className="w-full bg-[#050a14]/60 border border-slate-800 rounded-[22px] pl-14 pr-6 py-4 text-sm font-bold text-white focus:outline-none focus:border-blue-500 transition-all uppercase placeholder:text-slate-800"
+                  className="w-full bg-[#050a14]/60 rounded-[22px] pl-14 pr-6 py-4 text-sm font-bold text-white transition-all uppercase placeholder:text-slate-800 neon-input-white"
                   placeholder="EX: PCP / FOLLOW-UP"
                   required
                 />
