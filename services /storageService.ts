@@ -160,13 +160,30 @@ export const storageService = {
     try {
       const response = await fetch(`${API_URL}?sheet=${SHEETS.GROUPS}&t=${Date.now()}`);
       const data = await response.json();
-      return (Array.isArray(data) ? data : []).map((g: any) => ({
-        name: String(g.name || g.NAME || ''),
-        sheetName: String(g.name || g.NAME || ''),
-        type: 'group',
-        unreadCount: 0,
-        lastReadCount: 0
-      }));
+      return (Array.isArray(data) ? data : []).map((g: any) => {
+        let parsedMembers: string[] = [];
+        try {
+          const rawMembers = g.members || g.MEMBERS || '';
+          if (typeof rawMembers === 'string' && rawMembers.startsWith('[')) {
+            parsedMembers = JSON.parse(rawMembers).map(String);
+          } else if (typeof rawMembers === 'string') {
+            parsedMembers = rawMembers.split(',').map(s => String(s).trim()).filter(Boolean);
+          } else if (Array.isArray(rawMembers)) {
+            parsedMembers = rawMembers.map(String);
+          }
+        } catch (e) {
+          console.error("Erro ao parsear members do grupo", e);
+        }
+
+        return {
+          name: String(g.name || g.NAME || ''),
+          sheetName: String(g.name || g.NAME || ''),
+          type: 'group' as const,
+          unreadCount: 0,
+          lastReadCount: 0,
+          members: parsedMembers
+        };
+      });
     } catch (error) { return []; }
   },
 
@@ -189,4 +206,3 @@ export const toInputDate = (dateStr: any): string => {
   const d = new Date(dateStr);
   return isNaN(d.getTime()) ? '' : d.toISOString().split('T')[0];
 };
-
