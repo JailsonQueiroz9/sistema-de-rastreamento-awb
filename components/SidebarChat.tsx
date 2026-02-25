@@ -28,6 +28,14 @@ const SidebarChat: React.FC<SidebarChatProps> = ({
     (u.name || '').toLowerCase().includes(q.toLowerCase())
   );
 
+  const visibleGroups = React.useMemo(() => {
+    return groups.filter(g => {
+      const isBaseGroup = g.sheetName === 'CHAT' || g.sheetName === 'LOG_INT';
+      if (isBaseGroup) return true;
+      return g.members && currentUser?.id && g.members.includes(currentUser.id);
+    });
+  }, [groups, currentUser]);
+
   return (
     <aside className="w-80 border-r border-white/5 bg-[#0c1425] flex flex-col shrink-0">
       <div className="p-8 border-b border-white/5 space-y-6">
@@ -64,7 +72,7 @@ const SidebarChat: React.FC<SidebarChatProps> = ({
             <Users size={10} /> Canais Operacionais
           </p>
           <div className="space-y-1">
-            {groups.map(g => (
+            {visibleGroups.map(g => (
               <button 
                 key={g.sheetName}
                 onClick={() => onSelect(g)}
@@ -103,7 +111,7 @@ const SidebarChat: React.FC<SidebarChatProps> = ({
               return (
                 <button 
                   key={u.id}
-                  onClick={() => onSelect({ name: u.name, sheetName: dmSheet, type: 'dm', unreadCount: 0, lastReadCount: 0 })}
+                  onClick={() => onSelect({ name: u.name, sheetName: dmSheet, type: 'dm', unreadCount: 0, lastReadCount: 0, members: [] })}
                   className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all relative border ${isActive ? 'bg-emerald-600/10 border-emerald-500/20 text-white' : 'text-slate-500 hover:bg-white/5 border-transparent'}`}
                 >
                   <div className="relative">
