@@ -58,8 +58,7 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
 
     setIsLoading(true);
     try {
-      const members = [...selectedMembers];
-      if (currentUser?.id) members.push(currentUser.id);
+      const members = Array.from(new Set([...selectedMembers, currentUser?.id].filter(Boolean) as string[]));
 
       await onCreate({
         name: groupName.toUpperCase(),
