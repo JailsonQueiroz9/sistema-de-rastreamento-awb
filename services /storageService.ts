@@ -1,4 +1,3 @@
-
 import { AWBRecord, User, ChatMessage, ViewType, GroupCreatePayload, ChatGroup } from '../types';
 
 const API_URL = "https://script.google.com/macros/s/AKfycbyahGxDOYN6BxLXIlufM0sfd8B-CU8VMEqmCiQsd3WDCrJJi4C8tGq4aeohJp0DwF_m/exec";
