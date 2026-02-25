@@ -32,6 +32,7 @@ export interface ChatGroup {
   type: 'group' | 'dm';
   unreadCount: number;
   lastReadCount: number;
+  members: string[];
 }
 
 export interface GroupCreatePayload {
